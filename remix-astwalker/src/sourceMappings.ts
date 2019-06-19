@@ -1,26 +1,58 @@
 import { isAstNode, AstWalker } from './astWalker';
-import { AstNode, Location } from "./types";
+import { AstNode, LineColPosition, LineColRange, Location } from "./types";
+const util = require("remix-lib").util;
 
 export declare interface SourceMappings {
   new(): SourceMappings;
 }
 
 /**
- * Break out fields of an AST's "src" attribute string (s:l:f)
- * into its "start", "length", and "file index" components.
+ * Turn an character offset into a LineColPosition
+ *
+ * @param {Number} offset  - the character offset to convert.
+ * @returns {LineColPosition}
+ */
+export function lineColPositionFromOffset(offset: number, lineBreaks: Array<number>): LineColPosition {
+  let line: number = util.findLowerBound(offset, lineBreaks);
+  if (lineBreaks[line] !== offset) {
+    line += 1;
+  }
+  const beginColumn = line === 0 ? 0 : (lineBreaks[line - 1] + 1);
+  return <LineColPosition>{
+    line: line + 1,
+    character: (offset - beginColumn) + 1
+  }
+}
+
+/**
+ * Turn an AST's "src" attribute string (s:l:f)
+ * into a Location
  *
  * @param {AstNode} astNode  - the object to convert.
+ * @returns {Location} | null
  */
 export function sourceLocationFromAstNode(astNode: AstNode): Location | null {
   if (isAstNode(astNode) && astNode.src) {
-    var split = astNode.src.split(':')
-    return <Location>{
-      start: parseInt(split[0], 10),
-      length: parseInt(split[1], 10),
-      file: parseInt(split[2], 10)
-    }
+    return sourceLocationFromSrc(astNode.src)
   }
   return null;
+}
+
+/**
+ * Break out fields of an AST's "src" attribute string (s:l:f)
+ * into its "start", "length", and "file index" components
+ * and return that as a Location
+ *
+ * @param {String} src  - A solc "src" field
+ * @returns {Location}
+ */
+export function sourceLocationFromSrc(src: string): Location {
+  const split = src.split(':')
+  return <Location>{
+    start: parseInt(split[0], 10),
+    length: parseInt(split[1], 10),
+    file: parseInt(split[2], 10)
+  }
 }
 
 /**
@@ -70,6 +102,13 @@ export class SourceMappings {
     return found;
   }
 
+  /**
+   * Retrieve the first @arg astNodeType that include the source map at arg instIndex
+   *
+   * @param {String | undefined} astNodeType - nodeType that a found ASTNode must be. Use "null" if any ASTNode can match
+   * @param {Location} sourceLocation - "src" location that the AST node must match
+   * @return {AstNode | null} ast object matching source and nodeType or "null" if node matches
+   */
   findNodeAtSourceLocation(astNodeType: string | undefined, sourceLocation: Location, ast: AstNode | null): AstNode | null {
     const astWalker = new AstWalker()
     let found = null;
@@ -90,4 +129,26 @@ export class SourceMappings {
     astWalker.walkFull(ast, callback);
     return found;
   }
+
+  /**
+   * Retrieve the line/column range position for the given source-mapping string
+   *
+   * @param {String} src - object containing attributes {source} and {length}
+   * @return {LineColRange} returns an object {start: {line, column}, end: {line, column}} (line/column count start at 0)
+   */
+  srcToLineColumnRange(src: string): LineColRange {
+    const sourceLocation = sourceLocationFromSrc(src);
+    if (sourceLocation.start >= 0 && sourceLocation.length >= 0) {
+      return <LineColRange>{
+        start: lineColPositionFromOffset(sourceLocation.start, this.lineBreaks),
+        end: lineColPositionFromOffset(sourceLocation.start + sourceLocation.length, this.lineBreaks)
+      }
+    } else {
+      return <LineColRange>{
+        start: null,
+        end: null
+      }
+    }
+  }
+
 }
