@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
-import { AstNodeLegacy, Node, AstNode } from "./index";
+// import { AstNodeLegacy, Node, AstNode } from "./types";
+import { AstNode } from "./types";
 
 export declare interface AstWalker {
   new(): EventEmitter;
@@ -33,89 +34,89 @@ export function isAstNode(node: Object): boolean {
  * If no event for the current type, children are visited.
  */
 export class AstWalker extends EventEmitter {
-  manageCallback(
-    node: AstNodeLegacy | AstNode,
-    callback: Object | Function
-  ): any {
-    // FIXME: we shouldn't be doing this callback determination type on each AST node,
-    // since the callback function is set once per walk.
-    // Better would be to store the right one as a variable and
-    // return that.
-    if (<AstNodeLegacy>node) {
-      if ((<AstNodeLegacy>node).name in callback) {
-        return callback[(<AstNodeLegacy>node).name](node);
-      } else {
-        return callback["*"](node);
-      }
-    }
-    if (<AstNode>node) {
-      if ((<AstNode>node).nodeType in callback) {
-        /* istanbul ignore next */
-        return callback[(<AstNode>node).nodeType](node);
-      } else {
-        /* istanbul ignore next */
-        return callback["*"](node);
-      }
-    }
-  }
-  walk(ast: AstNodeLegacy | AstNode, callback?: Function | Object) {
-    if (callback) {
-      if (callback instanceof Function) {
-        callback = Object({ "*": callback });
-      }
-      if (!("*" in callback)) {
-        callback["*"] = function() {
-          return true;
-        };
-      }
-      if (<AstNodeLegacy>ast) {
-        if (
-          this.manageCallback(<AstNodeLegacy>ast, callback) &&
-          (<AstNodeLegacy>ast).children &&
-          (<AstNodeLegacy>ast).children.length > 0
-        ) {
-          for (let k in (<AstNodeLegacy>ast).children) {
-            let child = (<AstNodeLegacy>ast).children[k];
-            this.walk(child, callback);
-          }
-        }
-      }
-      if (<AstNode>ast) {
-        if (
-          this.manageCallback(<AstNode>ast, callback) &&
-          (<AstNode>ast).nodes &&
-          (<AstNode>ast).nodes.length > 0
-        ) {
-          for (let k in (<AstNode>ast).nodes) {
-            let child = (<AstNode>ast).nodes[k];
-            this.walk(child, callback);
-          }
-        }
-      }
-    } else {
-      if (<AstNodeLegacy>ast) {
-        if (
-          (<AstNodeLegacy>ast).children &&
-          (<AstNodeLegacy>ast).children.length > 0
-        ) {
-          for (let k in (<AstNodeLegacy>ast).children) {
-            let child = (<AstNodeLegacy>ast).children[k];
-            this.emit("node", child);
-            this.walk(child);
-          }
-        }
-      }
-      if (<AstNode>ast) {
-        if ((<AstNode>ast).nodes && (<AstNode>ast).nodes.length > 0) {
-          for (let k in (<AstNode>ast).nodes) {
-            let child = (<AstNode>ast).nodes[k];
-            this.emit("node", child);
-            this.walk(child);
-          }
-        }
-      }
-    }
-  }
+  // manageCallback(
+  //   node: AstNodeLegacy | AstNode,
+  //   callback: Object | Function
+  // ): any {
+  //   // FIXME: we shouldn't be doing this callback determination type on each AST node,
+  //   // since the callback function is set once per walk.
+  //   // Better would be to store the right one as a variable and
+  //   // return that.
+  //   if (<AstNodeLegacy>node) {
+  //     if ((<AstNodeLegacy>node).name in callback) {
+  //       return callback[(<AstNodeLegacy>node).name](node);
+  //     } else {
+  //       return callback["*"](node);
+  //     }
+  //   }
+  //   if (<AstNode>node) {
+  //     if ((<AstNode>node).nodeType in callback) {
+  //       /* istanbul ignore next */
+  //       return callback[(<AstNode>node).nodeType](node);
+  //     } else {
+  //       /* istanbul ignore next */
+  //       return callback["*"](node);
+  //     }
+  //   }
+  // }
+  // walk(ast: AstNodeLegacy | AstNode, callback?: Function | Object) {
+  //   if (callback) {
+  //     if (callback instanceof Function) {
+  //       callback = Object({ "*": callback });
+  //     }
+  //     if (!("*" in callback)) {
+  //       callback["*"] = function() {
+  //         return true;
+  //       };
+  //     }
+  //     if (<AstNodeLegacy>ast) {
+  //       if (
+  //         this.manageCallback(<AstNodeLegacy>ast, callback) &&
+  //         (<AstNodeLegacy>ast).children &&
+  //         (<AstNodeLegacy>ast).children.length > 0
+  //       ) {
+  //         for (let k in (<AstNodeLegacy>ast).children) {
+  //           let child = (<AstNodeLegacy>ast).children[k];
+  //           this.walk(child, callback);
+  //         }
+  //       }
+  //     }
+  //     if (<AstNode>ast) {
+  //       if (
+  //         this.manageCallback(<AstNode>ast, callback) &&
+  //         (<AstNode>ast).nodes &&
+  //         (<AstNode>ast).nodes.length > 0
+  //       ) {
+  //         for (let k in (<AstNode>ast).nodes) {
+  //           let child = (<AstNode>ast).nodes[k];
+  //           this.walk(child, callback);
+  //         }
+  //       }
+  //     }
+  //   } else {
+  //     if (<AstNodeLegacy>ast) {
+  //       if (
+  //         (<AstNodeLegacy>ast).children &&
+  //         (<AstNodeLegacy>ast).children.length > 0
+  //       ) {
+  //         for (let k in (<AstNodeLegacy>ast).children) {
+  //           let child = (<AstNodeLegacy>ast).children[k];
+  //           this.emit("node", child);
+  //           this.walk(child);
+  //         }
+  //       }
+  //     }
+  //     if (<AstNode>ast) {
+  //       if ((<AstNode>ast).nodes && (<AstNode>ast).nodes.length > 0) {
+  //         for (let k in (<AstNode>ast).nodes) {
+  //           let child = (<AstNode>ast).nodes[k];
+  //           this.emit("node", child);
+  //           this.walk(child);
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
 
   walkFullInternal(ast: AstNode, callback: Function) {
 
@@ -146,19 +147,19 @@ export class AstWalker extends EventEmitter {
   }
 
 
-  walkAstList(sourcesList: Node, cb?: Function) {
-    if (cb) {
-      if (sourcesList.ast) {
-        this.walk(sourcesList.ast, cb);
-      } else {
-        this.walk(sourcesList.legacyAST, cb);
-      }
-    } else {
-      if (sourcesList.ast) {
-        this.walk(sourcesList.ast);
-      } else {
-        this.walk(sourcesList.legacyAST);
-      }
-    }
-  }
+  // walkAstList(sourcesList: Node, cb?: Function) {
+  //   if (cb) {
+  //     if (sourcesList.ast) {
+  //       this.walk(sourcesList.ast, cb);
+  //     } else {
+  //       this.walk(sourcesList.legacyAST, cb);
+  //     }
+  //   } else {
+  //     if (sourcesList.ast) {
+  //       this.walk(sourcesList.ast);
+  //     } else {
+  //       this.walk(sourcesList.legacyAST);
+  //     }
+  //   }
+  // }
 }

@@ -6,13 +6,18 @@ export declare interface SourceMappings {
   new(): SourceMappings;
 }
 
+// This is intended to be compatibile with VScode's Position.
+// However it is pretty common with other things too.
+// Note: File index is missing here
+type LineBreaks = Array<number>;
+
 /**
  * Turn an character offset into a LineColPosition
  *
  * @param {Number} offset  - the character offset to convert.
  * @returns {LineColPosition}
  */
-export function lineColPositionFromOffset(offset: number, lineBreaks: Array<number>): LineColPosition {
+export function lineColPositionFromOffset(offset: number, lineBreaks: LineBreaks): LineColPosition {
   let line: number = util.findLowerBound(offset, lineBreaks);
   if (lineBreaks[line] !== offset) {
     line += 1;
@@ -62,14 +67,14 @@ export function sourceLocationFromSrc(src: string): Location {
 export class SourceMappings {
 
   readonly source: string;
-  readonly lineBreaks: Array<number>;
+  readonly lineBreaks: LineBreaks;
 
   constructor(source: string) {
     this.source = source;
 
     // Create a list of line offsets which will be used to map between
     // character offset and line/column positions.
-    let lineBreaks: Array<number> = [];
+    let lineBreaks: LineBreaks = [];
     for (var pos = source.indexOf('\n'); pos >= 0; pos = source.indexOf('\n', pos + 1)) {
       lineBreaks.push(pos)
     }

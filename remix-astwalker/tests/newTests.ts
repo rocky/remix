@@ -6,52 +6,53 @@ import legacyNode from "./resources/legacyAST";
 tape("New ASTWalker", (t: tape.Test) => {
   // New Ast Object
   const astWalker = new AstWalker();
-  t.test("ASTWalker.walk && .walkastList", (st: tape.Test) => {
-    st.plan(24);
-    // EventListener
-    astWalker.on("node", node => {
-      if (node.nodeType === "ContractDefinition") {
-        checkContract(st, node);
-      }
+  // t.test("ASTWalker.walk && .walkastList", (st: tape.Test) => {
+  //   st.plan(24);
+  //   // EventListener
+  //   astWalker.on("node", node => {
+  //     if (node.nodeType === "ContractDefinition") {
+  //       checkContract(st, node);
+  //     }
 
-      if (node.nodeType === "PragmaDirective") {
-        checkProgramDirective(st, node);
-      }
-    });
+  //     if (node.nodeType === "PragmaDirective") {
+  //       checkProgramDirective(st, node);
+  //     }
+  //   });
 
-    // Callback pattern
-    astWalker.walk(node.ast, (node: AstNode) => {
-      if (node.nodeType === "ContractDefinition") {
-        checkContract(st, node);
-      }
+  //   // Callback pattern
+  //   astWalker.walk(node.ast, (node: AstNode) => {
+  //     if (node.nodeType === "ContractDefinition") {
+  //       checkContract(st, node);
+  //     }
 
-      if (node.nodeType === "PragmaDirective") {
-        checkProgramDirective(st, node);
-      }
-    });
+  //     if (node.nodeType === "PragmaDirective") {
+  //       checkProgramDirective(st, node);
+  //     }
+  //   });
 
-    // Callback Object
-    var callback: any = {};
-    callback.FunctionDefinition = function(node: AstNode): boolean {
-      st.equal(node.name, "FunctionDefinition");
+  //   // Callback Object
+  //   var callback: any = {};
+  //   callback.FunctionDefinition = function(node: AstNode): boolean {
+  //     st.equal(node.name, "FunctionDefinition");
 
-      return true;
-    };
-    // Calling walk function with cb
-    astWalker.walk(node.ast, callback);
+  //     return true;
+  //   };
+  //   // Calling walk function with cb
+  //   astWalker.walk(node.ast, callback);
 
-    // Calling walk function without cb
-    astWalker.walk(node.ast);
+  //   // Calling walk function without cb
+  //   astWalker.walk(node.ast);
 
-    // Calling WALKASTLIST function
-    astWalker.walkAstList(node);
+  //   // Calling WALKASTLIST function
+  //   astWalker.walkAstList(node);
 
-    // Calling WALKASTLIST function with cb
-    astWalker.walkAstList(node, node => {
-      return true;
-    });
-    st.end();
-  });
+  //   // Calling WALKASTLIST function with cb
+  //   astWalker.walkAstList(node, node => {
+  //     return true;
+  //   });
+  //   st.end();
+  // });
+
   t.test("ASTWalkFull", (st: tape.Test) => {
     const astNodeCount = 26;
     st.plan(2 + astNodeCount);
