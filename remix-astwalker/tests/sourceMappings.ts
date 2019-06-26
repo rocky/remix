@@ -4,7 +4,7 @@ import {
   LineColPosition, lineColPositionFromOffset,
   LineColRange, Location,
   SourceMappings, sourceLocationFromAstNode,
-  sourceLocationFromSrc
+  sourceLocationFromSrc, srcFromSourceLocation
 } from "../src";
 import node from "./resources/newAST";
 
@@ -12,7 +12,7 @@ tape("SourceMappings", (t: tape.Test) => {
   const source = node.source;
   const srcMappings = new SourceMappings(source);
   t.test("SourceMappings conversions", (st: tape.Test) => {
-    st.plan(9);
+    st.plan(10);
     const loc = <Location>{
       start: 32,
       length: 6,
@@ -39,8 +39,13 @@ tape("SourceMappings", (t: tape.Test) => {
     st.deepEqual(sourceLocationFromAstNode(ast.nodes[0]),
       { start: 0, length: 31, file: 0 },
       "sourceLocationFromAstNode extracts a location");
-    st.deepEqual(sourceLocationFromSrc("32:6:0"), loc,
+    const srcStr = "32:6:0";
+    st.deepEqual(sourceLocationFromSrc(srcStr), loc,
       "sourceLocationFromSrc conversion");
+
+    st.equal(srcFromSourceLocation(sourceLocationFromSrc(srcStr)), srcStr,
+      "srcLocationFromSource <-> sourceLocationFromSrc roundtrip");
+
     const startLC = <LineColPosition>{ line: 6, character: 6 };
     st.deepEqual(srcMappings.srcToLineColumnRange("45:96:0"),
       <LineColRange>{

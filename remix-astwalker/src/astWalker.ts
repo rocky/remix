@@ -2,6 +2,7 @@ import { EventEmitter } from "events";
 // import { AstNodeLegacy, Node, AstNode } from "./types";
 import { AstNode } from "./types";
 
+
 export declare interface AstWalker {
   new(): EventEmitter;
 }
@@ -121,7 +122,7 @@ export class AstWalker extends EventEmitter {
   walkFullInternal(ast: AstNode, callback: Function) {
 
     if (isAstNode(ast)) {
-      // console.log(`XXX id ${ast.id}, nodeType: ${ast.nodeType}, src: ${ast.src}`);
+      console.log(`XXX id ${ast.id}, nodeType: ${ast.nodeType}, src: ${ast.src}`);
       callback(ast);
       for (let k of Object.keys(ast)) {
         // Possible optimization:
